@@ -17,11 +17,12 @@
 2) Type "./run.sh" to run the demo
 
 ## Alternatively you can run a python script 
-1) Type "python run.py" to start the database and the api respectively.
+1) Type "python -m pip install -r requirements.txt" to install the necessary modules (Making sure python is aliased to python3)
+2) Type "python run.py" to start the database and the api respectively.
 
 
 ## DEMO VIDEO
-[![Demo of the API](http://img.youtube.com/vi/gwuh00BkjU4/0.jpg)](https://www.youtube.com/watch?v=gwuh00BkjU4 "Backend Take-home Demo")
+[![Demo of the API](http://img.youtube.com/vi/qQIiE28O7BQ/0.jpg)](https://www.youtube.com/watch?v=qQIiE28O7BQ "Backend Take-home Demo")
 
 ## ---------- End My Implementation ----------
 

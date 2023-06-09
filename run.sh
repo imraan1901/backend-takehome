@@ -10,3 +10,4 @@ curl  http://127.0.0.1:8080/data -X GET
 API_ID=$(docker ps -aqf "name=processor-rest-api")
 DB_ID=$(docker ps -aqf "name=postgres_db")
 docker kill $API_ID $DB_ID
+
