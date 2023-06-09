@@ -1,4 +1,6 @@
 import os
+from functools import reduce
+
 import pandas as pd
 from internal.db import database
 import gc
@@ -71,10 +73,9 @@ def etl() -> int:
         gc.collect()
 
         # Merge dataframes together on user_id
-        data_df = pd.merge(pd.merge(total_experiments_per_user_df,
-                                    ave_experiments_amount_per_user_df,
-                                    on='user_id'), most_user_compound_by_user_df,
-                           on='user_id')
+        merge_df_list = [total_experiments_per_user_df, ave_experiments_amount_per_user_df,
+                         most_user_compound_by_user_df]
+        data_df = reduce(lambda left, right: pd.merge(left, right, on=['user_id'], how='outer'), merge_df_list)
 
         # Replace user_id with name of user
         data_df['user_id'] = users_df['name']

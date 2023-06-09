@@ -2,6 +2,7 @@ from flask_restful import Resource
 from internal.processor import processor
 from internal.db import database
 
+
 class Data(Resource):
 
     # Maybe you want to send some resource to process?
@@ -13,3 +14,4 @@ class Data(Resource):
         return database.get_data_from_db()
 
 # Add other resources here
+
