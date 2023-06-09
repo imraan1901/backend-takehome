@@ -39,7 +39,7 @@ def insert_table_into_db(data_df: pandas.DataFrame) -> int:
         engine = create_engine(url_object, poolclass=NullPool)
 
         # Insert data into database
-        data_df.to_sql(models.USERMETRICS.__tablename__, engine, if_exists='append', index=False)
+        data_df.to_sql(models.USERMETRICS.__tablename__, engine, if_exists='replace', index=False)
         return 0
 
     except Exception as error:

@@ -5,79 +5,96 @@ import gc
 
 
 def etl() -> int:
-    base_path = os.path.join(os.getcwd(), "data")
-    # Load CSV files
-    compounds_df = pd.read_csv(os.path.join(base_path, "compounds.csv"))
-    user_experiments_df = pd.read_csv(os.path.join(base_path, "user_experiments.csv"))
-    users_df = pd.read_csv(os.path.join(base_path, "users.csv"))
+    try:
+        base_path = os.path.join(os.getcwd(), "data")
+        # Load CSV files
+        compounds_df = pd.read_csv(os.path.join(base_path, "compounds.csv"))
+        user_experiments_df = pd.read_csv(os.path.join(base_path, "user_experiments.csv"))
+        users_df = pd.read_csv(os.path.join(base_path, "users.csv"))
 
-    # Remove tabs from the headers
-    compounds_df.columns = compounds_df.columns.str.strip()
-    user_experiments_df.columns = user_experiments_df.columns.str.strip()
-    users_df.columns = users_df.columns.str.strip()
+        # Sanitize files
+        user_experiments_df.replace(to_replace=[r"\\t|\\n|\\r", "\t|\n|\r"], value=["", ""], regex=True, inplace=True)
+        compounds_df.replace(to_replace=[r"\\t|\\n|\\r", "\t|\n|\r"], value=["", ""], regex=True, inplace=True)
+        users_df.replace(to_replace=[r"\\t|\\n|\\r", "\t|\n|\r"], value=["", ""], regex=True, inplace=True)
 
-    # Process files to derive features
-    total_experiments_per_user = list(list())
-    ave_experiments_amount_per_user = list(list())
-    most_user_compound_by_user = list(list())
+        # Remove tabs from the headers
+        compounds_df.columns = compounds_df.columns.str.strip()
+        user_experiments_df.columns = user_experiments_df.columns.str.strip()
+        users_df.columns = users_df.columns.str.strip()
 
-    # Go through every user
-    for user in users_df.loc[:, 'user_id']:
-        # Count rows (experiments) where user was involved to see total experiments a user ran.
-        rows_df = user_experiments_df.loc[user_experiments_df['user_id'] == user]
-        total_experiments_per_user.append([user, len(rows_df.index)])
+        # Process files to derive features
+        total_experiments_per_user = list(list())
+        ave_experiments_amount_per_user = list(list())
+        most_user_compound_by_user = list(list())
 
-        # Get the mean time of the experiments run by that user
-        mean = rows_df["experiment_run_time"].mean()
-        ave_experiments_amount_per_user.append([user, mean])
+        # Go through every user
+        for user in users_df.loc[:, 'user_id']:
+            # Count rows (experiments) where user was involved to see total experiments a user ran.
+            rows_df = user_experiments_df.query(f'user_id == {user}')
+            total_experiments_per_user.append([user, len(rows_df.index)])
 
-        # User's most commonly experimented compound
-        # Dictionary incase id is not in order, so we don't waste array space
-        compounds_dict = dict()
-        for _, row in rows_df.iterrows():
-            for compound_id in row['experiment_compound_ids'].split(';'):
-                sanatized_compound_id = compound_id.replace("\t", "")
-                # count how many times that compound was used by this user
-                if sanatized_compound_id not in compounds_dict:
-                    compounds_dict[sanatized_compound_id] = 1
-                else:
-                    compounds_dict[sanatized_compound_id] += 1
+            # Get the mean time of the experiments run by that user
+            mean = rows_df["experiment_run_time"].mean()
+            ave_experiments_amount_per_user.append([user, mean])
 
-        # Sort compound count in descending order
-        sorted_compounds = sorted(compounds_dict.items(), key=lambda x: x[1], reverse=True)
-        if sorted_compounds:
-            # sorted_compounds[0] = most used compound with count respectively e.g. (1, 121)
-            most_user_compound_by_user.append([user, int(sorted_compounds[0][0])])
-        else:
-            most_user_compound_by_user.append([user, []])
-    # Convert data to dataframe
-    total_experiments_per_user_df = data_to_df(total_experiments_per_user,
-                                               ["user_id", "total_experiments"])
-    ave_experiments_amount_per_user_df = data_to_df(ave_experiments_amount_per_user,
-                                                    ["user_id", "average_experiments_time"])
-    most_user_compound_by_user_df =  data_to_df(most_user_compound_by_user,
-                                                ["user_id", "most_common_used_compound"])
+            # User's most commonly experimented compound
+            # Dictionary incase id is not in order, so we don't waste array space
+            compounds_dict = dict()
+            for _, row in rows_df.iterrows():
+                for compound_id in row['experiment_compound_ids'].split(';'):
+                    # count how many times that compound was used by this user
+                    if compound_id not in compounds_dict:
+                        compounds_dict[compound_id] = 1
+                    else:
+                        compounds_dict[compound_id] += 1
 
-    # Tell python garbage collector to free deleted memory
-    gc.collect()
+            # Sort compound count in descending order
+            sorted_compounds = sorted(compounds_dict.items(), key=lambda x: x[1], reverse=True)
+            if sorted_compounds:
+                # sorted_compounds[0] = most used compound with count respectively e.g. (1, 121)
+                # Should only yield one row
+                temp_comp_df = compounds_df.query(f'compound_id == {sorted_compounds[0][0]}')
+                sanitized_compound_name = temp_comp_df['compound_name'].to_string(index=False)
+                most_user_compound_by_user.append([user, sanitized_compound_name])
+            else:
+                most_user_compound_by_user.append([user, []])
 
-    # Merge dataframes together on user_id
-    data_df = pd.merge(pd.merge(total_experiments_per_user_df,
-                             ave_experiments_amount_per_user_df,
-                             on='user_id'), most_user_compound_by_user_df,
-                             on='user_id')
+        # Convert data to dataframe
+        total_experiments_per_user_df = data_to_df(total_experiments_per_user,
+                                                   ["user_id", "total_experiments"])
+        ave_experiments_amount_per_user_df = data_to_df(ave_experiments_amount_per_user,
+                                                        ["user_id", "average_experiments_time"])
+        most_user_compound_by_user_df = data_to_df(most_user_compound_by_user,
+                                                   ["user_id", "most_common_used_compound"])
 
-    del total_experiments_per_user_df
-    del ave_experiments_amount_per_user_df
-    del most_user_compound_by_user_df
-    # Tell python garbage collector to free deleted memory
-    gc.collect()
+        # Tell python garbage collector to free deleted memory
+        gc.collect()
 
-    # Upload processed data into a database
-    if database.insert_table_into_db(data_df):
+        # Merge dataframes together on user_id
+        data_df = pd.merge(pd.merge(total_experiments_per_user_df,
+                                    ave_experiments_amount_per_user_df,
+                                    on='user_id'), most_user_compound_by_user_df,
+                           on='user_id')
+
+        # Replace user_id with name of user
+        data_df['user_id'] = users_df['name']
+        data_df.rename(columns={"user_id": "name"}, inplace=True)
+
+        del total_experiments_per_user_df
+        del ave_experiments_amount_per_user_df
+        del most_user_compound_by_user_df
+        # Tell python garbage collector to free deleted memory
+        gc.collect()
+
+        # Upload processed data into a database
+        if database.insert_table_into_db(data_df):
+            return 1
+
+        return 0
+
+    except Exception as e:
+        print(e)
         return 1
-
-    return 0
 
 
 def data_to_df(data: [[]], header: []) -> pd.DataFrame:

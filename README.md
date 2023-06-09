@@ -10,7 +10,7 @@
 ## How to run
 1) Type "docker compose up --build" to start the postgres database and the api respectively.
 2) Type "curl  http://127.0.0.1:8080/data -X POST" in ANOTHER terminal to trigger the ETL process.
-3) Type "curl  http://127.0.0.1:8080/data -X GET" in the same terminal as above to get the processed data from the database in JSON format.
+3) Type "curl  http://127.0.0.1:8080/data -X GET" in the same terminal as step 2 to get the processed data from the database in JSON format.
 
 ## Alternatively you can run a shell script 
 1) Type "chmod +x run.sh" to give the script executable permissions
