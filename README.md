@@ -1,16 +1,16 @@
 # Backend Engineering Take-Home Challenge
 
-## ---------- My Implemntation ----------
+## ---------- My Implementation ----------
 
 
 ## Tools
 * Docker Desktop 4.20.1 or Docker Engine, Docker CLI, and Docker Compose plugin (https://docs.docker.com/compose/install/)
-* Python 3.9 if running local python script
+* Python 3.9 if running local python script (https://www.python.org/downloads/release/python-390/)
 
 ## How to run
 1) Type "docker compose up --build" to start the postgres database and the api respectively.
-2) Type "curl  http://127.0.0.1:8080/data -X POST" to trigger the ETL process.
-3) Type "curl  http://127.0.0.1:8080/data -X GET" to get the processed data from the database in JSON format.
+2) Type "curl  http://127.0.0.1:8080/data -X POST" in ANOTHER terminal to trigger the ETL process.
+3) Type "curl  http://127.0.0.1:8080/data -X GET" in the same terminal as above to get the processed data from the database in JSON format.
 
 ## Alternatively you can run a shell script 
 1) Type "chmod +x run.sh" to give the script executable permissions
@@ -21,7 +21,7 @@
 
 
 ## DEMO VIDEO
-
+[![Demo of the API](http://img.youtube.com/vi/gwuh00BkjU4/0.jpg)](https://www.youtube.com/watch?v=gwuh00BkjU4 "Backend Take-home Demo")
 
 ## ---------- End My Implementation ----------
 
