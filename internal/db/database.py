@@ -39,7 +39,7 @@ def insert_table_into_db(data_df: pandas.DataFrame) -> int:
         return 1
 
 
-def get_data_from_db() -> ({}, int):
+def get_data() -> ({}, int):
     try:
         # Connect to an existing postgres database, close after use
         engine = create_engine(URL_OBJECT, poolclass=NullPool)
@@ -55,7 +55,7 @@ def get_data_from_db() -> ({}, int):
         for res in result:
             return_dict[models.USERMETRICS.__tablename__].append(dict(zip(header, res)))
 
-        return return_dict
+        return return_dict, 200
 
 
     except Exception as error:

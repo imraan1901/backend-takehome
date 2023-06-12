@@ -5,6 +5,8 @@ import pandas as pd
 from internal.db import database
 import gc
 
+from internal.db import database
+
 
 def etl() -> int:
     try:
@@ -112,3 +114,7 @@ def trigger_etl() -> ({}, int):
     if etl():
         return {"message": "Error: ETL process not started"}, 400
     return {"message": "ETL process started"}, 200
+
+
+def get_data_from_db() -> ({}, int):
+    return database.get_data()

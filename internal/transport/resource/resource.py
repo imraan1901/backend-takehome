@@ -1,6 +1,5 @@
 from flask_restful import Resource
 from internal.processor import processor
-from internal.db import database
 
 
 class Data(Resource):
@@ -11,7 +10,7 @@ class Data(Resource):
         return processor.trigger_etl()
 
     def get(self):
-        return database.get_data_from_db()
+        return processor.get_data_from_db()
 
 # Add other resources here
 
