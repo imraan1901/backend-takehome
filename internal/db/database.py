@@ -1,20 +1,20 @@
+import os
 from sqlalchemy import create_engine, URL, NullPool
 from internal.models import models
 import pandas
 
+URL_OBJECT = URL.create(
+    "postgresql+psycopg2",
+    username=os.getenv('DB_USERNAME'),
+    password=os.getenv('DB_PASSWORD'),
+    host=os.getenv('DB_HOST'),
+    database=os.getenv('DB_TABLE'),
+)
 
 def init_db() -> int:
     try:
-        # Would be env variables on machine
-        url_object = URL.create(
-            "postgresql+psycopg2",
-            username="postgres",
-            password="postgres",
-            host="db",
-            database="postgres",
-        )
         # Connect to an existing postgres database, close after use
-        engine = create_engine(url_object, poolclass=NullPool)
+        engine = create_engine(URL_OBJECT, poolclass=NullPool)
 
         # If table is in database skip creation
         models.USERMETRICS.__table__.create(engine, checkfirst=True)
@@ -27,16 +27,8 @@ def init_db() -> int:
 
 def insert_table_into_db(data_df: pandas.DataFrame) -> int:
     try:
-        # Would be env variables on machine
-        url_object = URL.create(
-            "postgresql+psycopg2",
-            username="postgres",
-            password="postgres",
-            host="db",
-            database="postgres",
-        )
         # Connect to an existing postgres database, close after use
-        engine = create_engine(url_object, poolclass=NullPool)
+        engine = create_engine(URL_OBJECT, poolclass=NullPool)
 
         # Insert data into database
         data_df.to_sql(models.USERMETRICS.__tablename__, engine, if_exists='replace', index=False)
@@ -49,16 +41,8 @@ def insert_table_into_db(data_df: pandas.DataFrame) -> int:
 
 def get_data_from_db() -> ({}, int):
     try:
-        # Would be env variables on machine
-        url_object = URL.create(
-            "postgresql+psycopg2",
-            username="postgres",
-            password="postgres",
-            host="db",
-            database="postgres",
-        )
         # Connect to an existing postgres database, close after use
-        engine = create_engine(url_object, poolclass=NullPool)
+        engine = create_engine(URL_OBJECT, poolclass=NullPool)
         connection = engine.connect()
         result = connection.execute(models.USERMETRICS.__table__.select())
         return_dict = dict()

@@ -1,5 +1,5 @@
 from flask_restful import Api
-from internal.resource import resource
+from internal.transport.resource import resource
 
 
 def register_handlers(api: Api) -> None:

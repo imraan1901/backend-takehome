@@ -8,7 +8,7 @@ class Base(DeclarativeBase):
 
 
 # Return non-private variables of models in order
-def __publicvars__(obj=object) -> [str]:
+def __publicvars__(obj: object) -> [str]:
     return [attr for attr in vars(obj) if not (attr.startswith('__') or attr.startswith('_'))]
 
 
